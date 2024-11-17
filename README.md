@@ -1,6 +1,7 @@
 # SkuggSnack
 
 ## Plan
+```
 ├── authentication_service/
 │   ├── Dockerfile
 │   ├── requirements.txt
@@ -31,5 +32,5 @@
 │   └── secrets.yaml
 │
 └── README.md
-
+```
 
