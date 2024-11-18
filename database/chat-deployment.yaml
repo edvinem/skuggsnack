@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-service
+  namespace: skuggsnack
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: chat-service
+  template:
+    metadata:
+      labels:
+        app: chat-service
+    spec:
+      containers:
+      - name: chat-service
+        image: yourdockerhubusername/chat-service:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: auth-secrets
+              key: secret_key

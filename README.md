@@ -1,36 +1,24 @@
 # SkuggSnack
 
 ## Plan
-```
-├── authentication_service/
+skuggsnack/
+├── auth-service
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   ├── auth_app.py  # The main FastAPI application for user authentication
-│   └── kubernetes/
-│       └── auth_deployment.yaml
-│
-├── chat_service/
+│   └── auth.py
+├── chat-service
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   ├── chat_app.py  # The main FastAPI application for chat
-│   └── kubernetes/
-│       └── chat_deployment.yaml
-│
-├── database_service/
-│   └── kubernetes/
-│       └── mongo_deployment.yaml
-│
-├── gateway/
-│   ├── tor_config/  # Configuration for Tor proxy setup
+│   └── chat.py
+├── frontend
 │   ├── Dockerfile
-│   └── kubernetes/
-│       └── gateway_deployment.yaml
-│
-├── kubernetes/
-│   ├── ingress.yaml
-│   ├── configmaps.yaml
-│   └── secrets.yaml
-│
+│   ├── package.json
+│   └── src/
+│       ├── App.js
+│       └── ...
+├── database
+│   ├── Dockerfile
+│   └── ...
+├── docker-compose.yml
 └── README.md
-```
 
