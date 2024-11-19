@@ -1,3 +1,5 @@
+// src/App.js
+
 import React, { useContext, useState } from 'react';
 import Login from './components/Login';
 import ChatWindow from './components/ChatWindow';
@@ -14,7 +16,7 @@ function AppContent() {
 
     return (
         <div className="flex h-screen">
-            <SideBar token={token} onSelectRecipient={setSelectedRecipient} />
+            <SideBar onSelectRecipient={setSelectedRecipient} />
             <div className="flex-1 flex flex-col">
                 <header className="flex justify-between items-center p-4 bg-blue-600 text-white">
                     <h1 className="text-xl">Skuggsnack Chat - {selectedRecipient}</h1>
@@ -22,7 +24,7 @@ function AppContent() {
                         Logout
                     </button>
                 </header>
-                <ChatWindow token={token} recipient={selectedRecipient} />
+                <ChatWindow recipient={selectedRecipient} />
             </div>
         </div>
     );

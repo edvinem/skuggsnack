@@ -3,12 +3,12 @@ from pydantic import BaseModel
 from typing import List, Dict
 import pymongo
 from pymongo.errors import ConnectionFailure
-from datetime import datetime
+from datetime import datetime, timezone
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 
 # Configuration
-SECRET_KEY = "your_secret_key"  # Should match the auth-service secret
+SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"
 ALGORITHM = "HS256"
 
 # FastAPI initialization
@@ -27,8 +27,8 @@ class Message(BaseModel):
     sender: str
     recipient: str  # Either a user, group, or channel name
     content: str
-    timestamp: datetime = datetime.utcnow()
-    recipient_type: str  # Either "user", "group", or "channel"
+    timestamp: datetime = datetime.now(timezone.utc)
+    recipient_type: str   # Either a user, group, or channel name
 
 class MessageResponse(BaseModel):
     sender: str
@@ -69,7 +69,7 @@ def send_message(message: Message, token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=403, detail="Sender mismatch")
     try:
         # Save message to MongoDB
-        message_dict = message.dict()
+        message_dict = message.model_dump()
         messages_collection.insert_one(message_dict)
         return message_dict
     except ConnectionFailure:
@@ -92,7 +92,7 @@ def create_channel(channel: Channel, token: str = Depends(oauth2_scheme)):
     user = verify_token(token)
     try:
         # Save channel to MongoDB
-        db["channels"].insert_one(channel.dict())
+        db["channels"].insert_one(channel.model_dump())
         return {"message": "Channel created successfully"}
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
@@ -102,7 +102,7 @@ def create_group(group: Group, token: str = Depends(oauth2_scheme)):
     user = verify_token(token)
     try:
         # Save group to MongoDB
-        db["groups"].insert_one(group.dict())
+        db["groups"].insert_one(group.model_dump())
         return {"message": "Group created successfully"}
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")

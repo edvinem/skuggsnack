@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+// src/components/SideBar.js
 
-function SideBar({ token, onSelectRecipient }) {
+import React, { useState, useEffect, useContext } from 'react';
+import api from '../api/axios'; // Updated import
+import { AuthContext } from '../context/AuthContext'; // Ensure AuthContext is imported
+
+function SideBar({ onSelectRecipient }) {
+    const { token, user } = useContext(AuthContext); // Access user information from context
     const [conversations, setConversations] = useState([]);
     const [error, setError] = useState('');
 
     const fetchConversations = async () => {
         try {
-            const response = await axios.get(`/chat/get_conversations/current_user`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get(`/chat/get_conversations/${user.username}`);
             setConversations(response.data);
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to fetch conversations');
@@ -21,7 +23,7 @@ function SideBar({ token, onSelectRecipient }) {
         // Optionally, set up polling or WebSocket for real-time updates
         const interval = setInterval(fetchConversations, 5000); // Poll every 5 seconds
         return () => clearInterval(interval);
-    }, []);
+    }, [user.username]);
 
     return (
         <div className="h-full p-4 bg-white border-r">

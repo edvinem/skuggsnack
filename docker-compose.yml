@@ -1,21 +1,61 @@
 services:
   mongo:
-    image: mongo
+    image: mongo:5.0
     container_name: mongo
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - skuggsnack-network
 
-  chat_app:
-    build: ./chat
-    container_name: chat_app
+  auth_service:
+    build:
+      context: ./auth-service
+    container_name: auth_service
     ports:
-      - "8000:8000"
+      - "9000:9000"
     depends_on:
       - mongo
     environment:
-      - MONGO_URI=mongodb://mongo:27017/
+      - MONGO_URI=mongodb://mongo:27017/skuggsnack
+      - SECRET_KEY=amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy # Replace with a strong secret key
+    networks:
+      - skuggsnack-network
+
+  chat_service:
+    build:
+      context: ./chat-service
+    container_name: chat_service
+    ports:
+      - "9001:9001"
+    depends_on:
+      - mongo
+      - auth_service
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/skuggsnack
+      - SECRET_KEY=amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy # Ensure it matches auth_service
+    networks:
+      - skuggsnack-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - auth_service
+      - chat_service
+    environment:
+      - REACT_APP_API_BASE_URL=/
+    networks:
+      - skuggsnack-network
 
 volumes:
   mongo_data:
+
+
+networks:
+  skuggsnack-network:
+    driver: bridge

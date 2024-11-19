@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios'; // Updated import
 
 function Login({ onLogin }) {
     const [isRegister, setIsRegister] = useState(false);
@@ -15,11 +15,12 @@ function Login({ onLogin }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        const endpoint = isRegister ? '/auth/register' : '/auth/login';
-        const payload = isRegister ? { username, password } : { username, password };
+        const endpoint = isRegister ? '/auth/register' : '/auth/login'; // Relative API path
+
+        const payload = { username, password };
 
         try {
-            const response = await axios.post(endpoint, payload);
+            const response = await api.post(endpoint, payload);
             const { access_token } = response.data;
             onLogin(access_token);
         } catch (err) {

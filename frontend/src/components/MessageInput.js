@@ -1,4 +1,7 @@
+// src/components/MessageInput.js
+
 import React, { useState } from 'react';
+import api from '../api/axios'; // Updated import (if applicable)
 
 function MessageInput({ onSend }) {
     const [message, setMessage] = useState('');

@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import MessageInput from './MessageInput';
-import axios from 'axios';
+import api from '../api/axios'; // Updated import
+import { AuthContext } from '../context/AuthContext'; // Ensure AuthContext is imported
 
-function ChatWindow({ token }) {
+function ChatWindow({ recipient }) {
+    const { token, user } = useContext(AuthContext); // Access user information from context
     const [messages, setMessages] = useState([]);
-    const [recipient, setRecipient] = useState('general'); // Default recipient
     const [error, setError] = useState('');
 
     const fetchMessages = async () => {
         try {
-            const response = await axios.get(`/chat/get_messages/${recipient}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get(`/chat/get_messages/${recipient}`);
             setMessages(response.data);
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to fetch messages');
@@ -28,14 +27,12 @@ function ChatWindow({ token }) {
     const handleSendMessage = async (content) => {
         try {
             const payload = {
-                sender: 'current_user', // Replace with actual username from token
+                sender: user.username, // Extracted from AuthContext
                 recipient,
                 content,
-                recipient_type: 'channel' // Adjust based on recipient type
+                recipient_type: 'channel', // Adjust based on recipient type
             };
-            await axios.post('/chat/send_message', payload, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await api.post('/chat/send_message', payload);
             fetchMessages();
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to send message');
