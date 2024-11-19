@@ -6,10 +6,9 @@ from datetime import datetime, timedelta, timezone
 import pymongo
 from pymongo.errors import ConnectionFailure
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-import bcrypt
 
 # Configuration
-SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"
+SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"  # Replace with your actual secret key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -28,13 +27,19 @@ db = client["skuggsnack"]
 users_collection = db["users"]
 
 # Pydantic models
-class User(BaseModel):
+class UserIn(BaseModel):
     username: str
     password: str
+
+class UserOut(BaseModel):
+    username: str
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class Message(BaseModel):
+    message: str
 
 # Utility functions
 def verify_password(plain_password, hashed_password):
@@ -57,43 +62,54 @@ def authenticate_user(username: str, password: str):
         return False
     return user
 
-# API Endpoints
-@app.post("/auth/register")
-def register(user: User):
-    try:
-        if users_collection.find_one({"username": user.username}):
-            raise HTTPException(status_code=400, detail="Username already exists")
-        hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
-        user_data = {"username": user.username, "password": hashed_password}
-        users_collection.insert_one(user_data)
-        return {"message": "User registered successfully"}
-    except ConnectionFailure:
-        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
-
-@app.post("/auth/login")
-def login(user: User):
-    try:
-        db_user = users_collection.find_one({"username": user.username})
-        if not db_user or not bcrypt.checkpw(user.password.encode('utf-8'), db_user["password"]):
-            raise HTTPException(status_code=400, detail="Invalid credentials")
-        token = jwt.encode({"sub": user.username}, SECRET_KEY, algorithm=ALGORITHM)
-        return {"access_token": token}
-    except ConnectionFailure:
-        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
-
-@app.get("/users/me")
-def read_users_me(token: str = Depends(oauth2_scheme)):
+def verify_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid token")
+        return username
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    user = users_collection.find_one({"username": username})
-    if user is None:
-        raise HTTPException(status_code=401, detail="User not found")
-    return {"username": user["username"]}
+
+# API Endpoints
+@app.post("/auth/register", response_model=Message)
+def register(user: UserIn):
+    try:
+        if users_collection.find_one({"username": user.username}):
+            raise HTTPException(status_code=400, detail="Username already exists")
+        hashed_password = get_password_hash(user.password)
+        user_data = {"username": user.username, "hashed_password": hashed_password}
+        users_collection.insert_one(user_data)
+        return {"message": "User registered successfully"}
+    except ConnectionFailure:
+        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
+
+@app.post("/auth/login", response_model=Token)
+def login(user: UserIn):
+    try:
+        db_user = users_collection.find_one({"username": user.username})
+        if not db_user:
+            raise HTTPException(status_code=400, detail="Invalid credentials")
+        
+        # Check for both 'hashed_password' and 'password' keys
+        hashed_password = db_user.get("hashed_password") or db_user.get("password")
+        if not hashed_password:
+            raise HTTPException(status_code=400, detail="Password not set for user.")
+        
+        if not verify_password(user.password, hashed_password):
+            raise HTTPException(status_code=400, detail="Invalid credentials")
+        
+        token_data = {"sub": user.username}
+        token = create_access_token(data=token_data, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+        return {"access_token": token, "token_type": "bearer"}
+    except ConnectionFailure:
+        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
+
+@app.get("/auth/me", response_model=UserOut)
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    username = verify_token(token)
+    return {"username": username}
 
 # Health Check Endpoint
 @app.get("/health")

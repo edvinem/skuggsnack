@@ -15,14 +15,19 @@ function Login({ onLogin }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        const endpoint = isRegister ? '/auth/register' : '/auth/login'; // Relative API path
-
+        const endpoint = isRegister ? '/auth/register' : '/auth/login';
         const payload = { username, password };
 
         try {
             const response = await api.post(endpoint, payload);
-            const { access_token } = response.data;
-            onLogin(access_token);
+            if (isRegister) {
+                // Handle registration success
+                setIsRegister(false);
+                setError('Registration successful. Please log in.');
+            } else {
+                const { access_token } = response.data;
+                onLogin(access_token);
+            }
         } catch (err) {
             setError(err.response?.data?.detail || 'An error occurred');
         }

@@ -1,7 +1,6 @@
-// src/components/MessageInput.js
-
+// frontend/src/components/MessageInput.js
 import React, { useState } from 'react';
-import api from '../api/axios'; // Updated import (if applicable)
+import { FiSend } from 'react-icons/fi'; // Optional: Add icons
 
 function MessageInput({ onSend }) {
     const [message, setMessage] = useState('');
@@ -14,19 +13,16 @@ function MessageInput({ onSend }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex p-4 bg-gray-100">
+        <form onSubmit={handleSubmit} className="flex items-center">
             <input
                 type="text"
+                placeholder="Type your message..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1 px-4 py-2 mr-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="flex-1 px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <button
-                type="submit"
-                className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
-            >
-                Send
+            <button type="submit" className="px-4 py-2 text-white bg-blue-600 rounded-r-md hover:bg-blue-700">
+                <FiSend size={20} />
             </button>
         </form>
     );

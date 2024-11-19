@@ -1,40 +1,54 @@
-// src/App.js
-
-import React, { useContext, useState } from 'react';
+// frontend/src/App.js
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Header from './components/Header';
 import Login from './components/Login';
-import ChatWindow from './components/ChatWindow';
-import SideBar from './components/SideBar';
-import { AuthContext, AuthProvider } from './context/AuthContext';
-
-function AppContent() {
-    const { token, user, login, logout } = useContext(AuthContext);
-    const [selectedRecipient, setSelectedRecipient] = useState('general');
-
-    if (!token) {
-        return <Login onLogin={login} />;
-    }
-
-    return (
-        <div className="flex h-screen">
-            <SideBar onSelectRecipient={setSelectedRecipient} />
-            <div className="flex-1 flex flex-col">
-                <header className="flex justify-between items-center p-4 bg-blue-600 text-white">
-                    <h1 className="text-xl">Skuggsnack Chat - {selectedRecipient}</h1>
-                    <button onClick={logout} className="px-3 py-1 bg-red-500 rounded hover:bg-red-600">
-                        Logout
-                    </button>
-                </header>
-                <ChatWindow recipient={selectedRecipient} />
-            </div>
-        </div>
-    );
-}
+import Chat from './components/Chat';
+import AuthContext from './context/AuthContext';
+import api from './api/axios';
 
 function App() {
+    const [token, setToken] = useState(localStorage.getItem('token') || '');
+    const [user, setUser] = useState(null);
+
+    const handleLogin = (newToken) => {
+        setToken(newToken);
+        localStorage.setItem('token', newToken);
+    };
+
+    const handleLogout = () => {
+        setToken('');
+        setUser(null);
+        localStorage.removeItem('token');
+    };
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (token) {
+                try {
+                    const response = await api.get('/auth/me');
+                    setUser(response.data);
+                } catch (err) {
+                    console.error('Failed to fetch user:', err);
+                    handleLogout();
+                }
+            }
+        };
+        fetchUser();
+    }, [token]);
+
     return (
-        <AuthProvider>
-            <AppContent />
-        </AuthProvider>
+        <AuthContext.Provider value={{ token, user, handleLogin, handleLogout }}>
+            <Router>
+                <Header />
+                <Routes>
+                    <Route path="/" element={token ? <Navigate to="/chat" /> : <Login onLogin={handleLogin} />} />
+                    <Route path="/login" element={<Login onLogin={handleLogin} />} />
+                    <Route path="/chat" element={token ? <Chat /> : <Navigate to="/" />} />
+                    {/* Add more routes as needed */}
+                </Routes>
+            </Router>
+        </AuthContext.Provider>
     );
 }
 

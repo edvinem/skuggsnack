@@ -25,10 +25,10 @@ messages_collection = db["messages"]
 # Pydantic models
 class Message(BaseModel):
     sender: str
-    recipient: str  # Either a user, group, or channel name
+    recipient: str
     content: str
-    timestamp: datetime = datetime.now(timezone.utc)
-    recipient_type: str   # Either a user, group, or channel name
+    recipient_type: str  # 'user' or 'channel'
+    timestamp: datetime = None
 
 class MessageResponse(BaseModel):
     sender: str
@@ -61,31 +61,19 @@ def verify_token(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# API Endpoints
-@app.post("/send_message", response_model=MessageResponse)
-def send_message(message: Message, token: str = Depends(oauth2_scheme)):
-    sender = verify_token(token)
-    if sender != message.sender:
-        raise HTTPException(status_code=403, detail="Sender mismatch")
-    try:
-        # Save message to MongoDB
-        message_dict = message.model_dump()
-        messages_collection.insert_one(message_dict)
-        return message_dict
-    except ConnectionFailure:
-        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
+# Routes
+@app.get("/get_messages/{recipient}")
+def get_messages(recipient: str):
+    messages = list(messages_collection.find({"recipient": recipient}))
+    for msg in messages:
+        msg["_id"] = str(msg["_id"])  # Convert ObjectId to string
+    return messages
 
-@app.get("/get_messages/{recipient}", response_model=List[MessageResponse])
-def get_messages(recipient: str, token: str = Depends(oauth2_scheme)):
-    user = verify_token(token)
-    try:
-        # Retrieve messages for recipient
-        messages = list(messages_collection.find({"recipient": recipient}))
-        for message in messages:
-            message["_id"] = str(message["_id"])  # Convert ObjectId to string for JSON serialization
-        return messages
-    except ConnectionFailure:
-        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
+@app.post("/send_message")
+def send_message(message: Message):
+    message.timestamp = datetime.utcnow()
+    messages_collection.insert_one(message.dict())
+    return {"message": "Message sent"}
 
 @app.post("/create_channel", response_model=Dict[str, str])
 def create_channel(channel: Channel, token: str = Depends(oauth2_scheme)):
