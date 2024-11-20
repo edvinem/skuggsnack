@@ -5,6 +5,7 @@ import pymongo
 from pymongo.errors import ConnectionFailure
 from datetime import datetime, timezone
 from jose import JWTError, jwt
+from bson import ObjectId
 from fastapi.security import OAuth2PasswordBearer
 
 # Configuration
@@ -28,7 +29,7 @@ class Message(BaseModel):
     recipient: str
     content: str
     recipient_type: str  # 'user' or 'channel'
-    timestamp: datetime = None
+    timestamp: datetime = datetime.now(timezone.utc)
 
 class MessageResponse(BaseModel):
     sender: str
@@ -36,6 +37,10 @@ class MessageResponse(BaseModel):
     content: str
     timestamp: datetime
     recipient_type: str
+
+    class Config:
+        orm_mode = True
+
 
 class Channel(BaseModel):
     name: str
@@ -50,7 +55,6 @@ class ConversationResponse(BaseModel):
     last_message: str
     timestamp: datetime
 
-# Utility functions
 def verify_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -61,19 +65,29 @@ def verify_token(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# Routes
-@app.get("/get_messages/{recipient}")
-def get_messages(recipient: str):
-    messages = list(messages_collection.find({"recipient": recipient}))
+# API Endpoints
+@app.get("/get_messages/{recipient}", response_model=List[MessageResponse])
+def get_messages(recipient: str, token: str = Depends(oauth2_scheme)):
+    sender = verify_token(token)
+    messages = list(messages_collection.find({
+        "$or": [
+            {"sender": sender, "recipient": recipient, "recipient_type": "user"},
+            {"sender": recipient, "recipient": sender, "recipient_type": "user"}
+        ]
+    }))
     for msg in messages:
-        msg["_id"] = str(msg["_id"])  # Convert ObjectId to string
+        msg["_id"] = str(msg["_id"])
     return messages
 
+
 @app.post("/send_message")
-def send_message(message: Message):
-    message.timestamp = datetime.utcnow()
-    messages_collection.insert_one(message.dict())
+def send_message(message: Message, token: str = Depends(oauth2_scheme)):
+    sender = verify_token(token)
+    message.sender = sender  # Ensure the sender is the authenticated user
+    message.timestamp = datetime.now(timezone.utc)
+    messages_collection.insert_one(message.model_dump())
     return {"message": "Message sent"}
+
 
 @app.post("/create_channel", response_model=Dict[str, str])
 def create_channel(channel: Channel, token: str = Depends(oauth2_scheme)):

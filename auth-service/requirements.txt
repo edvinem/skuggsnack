@@ -1,6 +1,7 @@
-fastapi
+fastapi>=0.100.0
 uvicorn
 pymongo
 passlib[bcrypt]
 python-jose
 python-multipart
+pydantic>=2.0.0

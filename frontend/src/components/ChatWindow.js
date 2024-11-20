@@ -1,57 +1,91 @@
+// frontend/src/components/ChatWindow.js
 import React, { useState, useEffect, useContext } from 'react';
-import MessageInput from './MessageInput';
-import api from '../api/axios'; // Updated import
-import { AuthContext } from '../context/AuthContext'; // Ensure AuthContext is imported
+import chatApi from '../api/chatApi';
+import AuthContext from '../context/AuthContext';
 
 function ChatWindow({ recipient }) {
-    const { token, user } = useContext(AuthContext); // Access user information from context
+    const { user } = useContext(AuthContext);
     const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
     const [error, setError] = useState('');
-
-    const fetchMessages = async () => {
-        try {
-            const response = await api.get(`/chat/get_messages/${recipient}`);
-            setMessages(response.data);
-        } catch (err) {
-            setError(err.response?.data?.detail || 'Failed to fetch messages');
-        }
-    };
 
     useEffect(() => {
         fetchMessages();
         // Optionally, set up polling or WebSocket for real-time updates
-        const interval = setInterval(fetchMessages, 5000); // Poll every 5 seconds
-        return () => clearInterval(interval);
     }, [recipient]);
 
-    const handleSendMessage = async (content) => {
+    const fetchMessages = async () => {
+        if (!recipient) return;
+        try {
+            const response = await chatApi.get(`/get_messages/${recipient}`);
+            const data = response.data;
+            if (Array.isArray(data)) {
+                setMessages(data);
+            } else {
+                console.error('Expected an array but got:', data);
+                setMessages([]);
+            }
+        } catch (err) {
+            console.error('Failed to fetch messages:', err);
+            setError('Failed to fetch messages');
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!newMessage.trim()) return;
         try {
             const payload = {
-                sender: user.username, // Extracted from AuthContext
                 recipient,
-                content,
-                recipient_type: 'channel', // Adjust based on recipient type
+                content: newMessage,
+                recipient_type: 'user',
             };
-            await api.post('/chat/send_message', payload);
-            fetchMessages();
+            const response = await chatApi.post('/send_message', payload);
+            setMessages([...messages, response.data]);
+            setNewMessage('');
         } catch (err) {
-            setError(err.response?.data?.detail || 'Failed to send message');
+            console.error('Failed to send message:', err);
+            setError('Failed to send message');
         }
     };
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto p-4">
-                {error && <div className="text-red-500">{error}</div>}
-                {messages.map((msg, index) => (
-                    <div key={index} className="mb-2">
-                        <strong>{msg.sender}</strong>
-                        <p>{msg.content}</p>
-                        <span className="text-xs text-gray-500">{new Date(msg.timestamp).toLocaleString()}</span>
-                    </div>
-                ))}
+        <div className="flex flex-col flex-1 p-4 bg-gray-100">
+            <div className="flex-1 overflow-y-auto mb-4">
+                {Array.isArray(messages) && messages.length > 0 ? (
+                    messages.map((msg, index) => (
+                        <div
+                            key={index}
+                            className={`mb-2 p-2 rounded ${msg.sender === user.username ? 'bg-blue-200 self-end' : 'bg-white'
+                                }`}
+                        >
+                            <strong>{msg.sender}</strong>
+                            <p>{msg.content}</p>
+                            <span className="text-xs text-gray-500">
+                                {new Date(msg.timestamp).toLocaleString()}
+                            </span>
+                        </div>
+                    ))
+                ) : (
+                    <p>No messages to display.</p>
+                )}
             </div>
-            <MessageInput onSend={handleSendMessage} />
+            <form onSubmit={handleSendMessage} className="flex">
+                <input
+                    type="text"
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    className="flex-1 px-3 py-2 border rounded-l"
+                />
+                <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-r hover:bg-blue-700"
+                >
+                    Send
+                </button>
+            </form>
+            {error && <div className="text-red-500 mt-2">{error}</div>}
         </div>
     );
 }

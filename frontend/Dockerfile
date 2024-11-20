@@ -8,7 +8,10 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 # Copy source files and build
-COPY . .
+COPY . ./
+
+RUN ls -l /app/src/components
+
 RUN npm run build
 
 # Stage 2: Serve with Nginx
