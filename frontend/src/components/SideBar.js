@@ -2,7 +2,7 @@
 import React, { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 
-function Sidebar({ onSelectFriend }) {
+function SideBar({ onSelectFriend }) {
     const { friends } = useContext(AuthContext);
 
     return (
@@ -27,4 +27,4 @@ function Sidebar({ onSelectFriend }) {
     );
 }
 
-export default Sidebar;
+export default SideBar;

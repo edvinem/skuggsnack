@@ -8,6 +8,7 @@ import AddFriend from './components/AddFriend';
 import FriendRequests from './components/FriendRequests';
 import Login from './components/Login';
 
+
 function App() {
     const { token, handleLogout } = useContext(AuthContext);
 

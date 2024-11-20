@@ -1,6 +1,6 @@
 // frontend/src/components/Chat.js
 import React, { useState } from 'react';
-import Sidebar from './Sidebar';
+import SideBar from './SideBar';
 import ChatWindow from './ChatWindow';
 
 function Chat() {
@@ -12,7 +12,7 @@ function Chat() {
 
     return (
         <div className="flex h-screen">
-            <Sidebar onSelectFriend={handleSelectFriend} />
+            <SideBar onSelectFriend={handleSelectFriend} />
             <div className="flex flex-col flex-1">
                 {recipient ? (
                     <ChatWindow recipient={recipient} />
