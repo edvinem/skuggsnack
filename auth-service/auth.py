@@ -8,9 +8,6 @@ import pymongo
 from typing import List
 from pymongo.errors import ConnectionFailure
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
-
 
 # Configuration
 SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"  # Replace with your actual secret key
@@ -115,20 +112,23 @@ def register(user: UserIn):
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
 
-@app.post("/auth/register", response_model=Message)
-def register(user: UserIn):
+@app.post("/auth/login", response_model=Token)
+def login(user: UserIn):
     try:
-        if users_collection.find_one({"username": user.username}):
-            raise HTTPException(status_code=400, detail="Username already exists")
-        hashed_password = get_password_hash(user.password)
-        user_data = {
-            "username": user.username,
-            "hashed_password": hashed_password,
-            "friends": [],
-            "friend_requests": []
-        }
-        users_collection.insert_one(user_data)
-        return {"message": "User registered successfully"}
+        db_user = users_collection.find_one({"username": user.username})
+        if not db_user:
+            raise HTTPException(status_code=400, detail="Invalid credentials")
+        
+        hashed_password = db_user.get("hashed_password")
+        if not hashed_password:
+            raise HTTPException(status_code=400, detail="Password not set for user.")
+        
+        if not verify_password(user.password, hashed_password):
+            raise HTTPException(status_code=400, detail="Invalid credentials")
+        
+        token_data = {"sub": user.username}
+        token = create_access_token(data=token_data, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+        return {"access_token": token, "token_type": "bearer"}
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
 
@@ -168,7 +168,6 @@ def get_friend_requests(token: str = Depends(oauth2_scheme)):
     current_username = verify_token(token)
     user = users_collection.find_one({"username": current_username})
     return user.get("friend_requests", [])
-
 
 @app.post("/auth/send_friend_request", response_model=Message)
 def send_friend_request(request: FriendRequest, token: str = Depends(oauth2_scheme)):
@@ -216,7 +215,6 @@ def accept_friend_request(request: AcceptFriendRequest, token: str = Depends(oau
         {"$addToSet": {"friends": current_username}}
     )
     return {"message": "Friend request accepted."}
-
 
 # Health Check Endpoint
 @app.get("/health")

@@ -12,22 +12,26 @@ function Login({ onLogin }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch('/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
-            const data = await response.json();
-            if (response.ok) {
+
+            const contentType = response.headers.get('content-type');
+            if (response.ok && contentType && contentType.includes('application/json')) {
+                const data = await response.json();
                 handleLogin(data.token);
             } else {
-                setError(data.message || 'Login failed');
+                const errorText = await response.text();
+                setError(errorText || 'Login failed');
             }
         } catch (err) {
             console.error('Login error:', err);
             setError('An error occurred. Please try again.');
         }
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#2E3047]">
