@@ -10,9 +10,14 @@ RUN npm install
 # Copy source files and build
 COPY . ./
 
+# Verify source files are copied
 RUN ls -l /app/src/components
 
+# Run the build process
 RUN npm run build
+
+# Verify that the build folder has been created with necessary files
+RUN ls -R /app/build
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
