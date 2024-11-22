@@ -7,10 +7,14 @@ from datetime import datetime, timezone
 from jose import JWTError, jwt
 from bson import ObjectId
 from fastapi.security import OAuth2PasswordBearer
+import logging
 
 # Configuration
 SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"
 ALGORITHM = "HS256"
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 # FastAPI initialization
 app = FastAPI()
@@ -41,6 +45,10 @@ class MessageResponse(BaseModel):
     class Config:
         orm_mode = True
 
+class MessageCreate(BaseModel):
+    recipient: str
+    content: str
+    recipient_type: str  # e.g., 'user' or 'group'
 
 class Channel(BaseModel):
     name: str
@@ -80,13 +88,26 @@ def get_messages(recipient: str, token: str = Depends(oauth2_scheme)):
     return messages
 
 
-@app.post("/send_message")
-def send_message(message: Message, token: str = Depends(oauth2_scheme)):
-    sender = verify_token(token)
-    message.sender = sender  # Ensure the sender is the authenticated user
-    message.timestamp = datetime.now(timezone.utc)
-    messages_collection.insert_one(message.model_dump())
-    return {"message": "Message sent"}
+@app.post("/send_message", response_model=MessageResponse)
+def send_message(message: MessageCreate, token: str = Depends(oauth2_scheme)):
+    try:
+        username = verify_token(token)
+        if not username:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        # Save the message to the database
+        message_data = {
+            "sender": username,
+            "recipient": message.recipient,
+            "content": message.content,
+            "recipient_type": message.recipient_type,
+            "timestamp": datetime.now(timezone.utc)
+        }
+        messages_collection.insert_one(message_data)
+        return MessageResponse(**message_data)
+    except Exception as e:
+        logger.error(f"Error in send_message: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @app.post("/create_channel", response_model=Dict[str, str])

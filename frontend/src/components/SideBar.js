@@ -1,4 +1,4 @@
-// frontend/src/components/Sidebar.js
+// frontend/src/components/SideBar.js
 import React, { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 
@@ -6,7 +6,7 @@ function SideBar({ onSelectFriend }) {
     const { friends } = useContext(AuthContext);
 
     return (
-        <aside className="w-64 bg-gray-800 text-white p-4">
+        <aside className="w-64 bg-gray-800 text-white p-4 overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Friends</h2>
             {friends && friends.length > 0 ? (
                 <ul>
@@ -21,7 +21,7 @@ function SideBar({ onSelectFriend }) {
                     ))}
                 </ul>
             ) : (
-                <p>No friends yet.</p>
+                <p className="text-gray-400">No friends yet.</p>
             )}
         </aside>
     );

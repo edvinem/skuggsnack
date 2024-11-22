@@ -1,10 +1,8 @@
 // frontend/src/components/AddFriend.js
-import React, { useState, useContext, useEffect } from 'react';
-import AuthContext from '../context/AuthContext';
-import authApi from '../api/authApi';  // Update import
+import React, { useState, useEffect } from 'react';
+import authApi from '../api/authApi';
 
 function AddFriend() {
-    const { user } = useContext(AuthContext);
     const [username, setUsername] = useState('');
     const [friendRequests, setFriendRequests] = useState([]);
     const [error, setError] = useState('');
@@ -16,7 +14,7 @@ function AddFriend() {
 
     const fetchFriendRequests = async () => {
         try {
-            const response = await authApi.get('/friend_requests');  // Use authApi
+            const response = await authApi.get('/friend_requests');
             setFriendRequests(response.data);
         } catch (err) {
             console.error('Failed to fetch friend requests:', err);
@@ -29,7 +27,7 @@ function AddFriend() {
         setSuccessMessage('');
         try {
             const payload = { friend_username: username };
-            const response = await authApi.post('/send_friend_request', payload);  // Use authApi
+            const response = await authApi.post('/send_friend_request', payload);
             setSuccessMessage(response.data.message);
             setUsername('');
         } catch (err) {
@@ -47,7 +45,7 @@ function AddFriend() {
 
     const handleAcceptFriendRequest = async (requestingUsername) => {
         try {
-            const response = await authApi.post('/accept_friend_request', { requesting_username: requestingUsername });  // Use authApi
+            const response = await authApi.post('/accept_friend_request', { requesting_username: requestingUsername });
             setSuccessMessage(response.data.message);
             // Remove the accepted request from the list
             setFriendRequests(friendRequests.filter((u) => u !== requestingUsername));
