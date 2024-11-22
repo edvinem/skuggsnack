@@ -1,7 +1,5 @@
-// frontend/src/components/Login.js
-
 import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom'; // Import Link for navigation
+import { Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import Button from './Button';
 
@@ -14,7 +12,6 @@ function Login({ onLogin }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Ensure the API endpoint is correct and accepts POST requests
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

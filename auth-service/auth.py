@@ -115,23 +115,20 @@ def register(user: UserIn):
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
 
-@app.post("/auth/login")
-def login(user: UserIn):
+@app.post("/auth/register", response_model=Message)
+def register(user: UserIn):
     try:
-        db_user = users_collection.find_one({"username": user.username})
-        if not db_user:
-            raise HTTPException(status_code=400, detail="Invalid credentials")
-        
-        hashed_password = db_user.get("hashed_password")
-        if not hashed_password:
-            raise HTTPException(status_code=400, detail="Password not set for user.")
-        
-        if not verify_password(user.password, hashed_password):
-            raise HTTPException(status_code=400, detail="Invalid credentials")
-        
-        token_data = {"sub": user.username}
-        token = create_access_token(data=token_data, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-        return {"access_token": token, "token_type": "bearer"}
+        if users_collection.find_one({"username": user.username}):
+            raise HTTPException(status_code=400, detail="Username already exists")
+        hashed_password = get_password_hash(user.password)
+        user_data = {
+            "username": user.username,
+            "hashed_password": hashed_password,
+            "friends": [],
+            "friend_requests": []
+        }
+        users_collection.insert_one(user_data)
+        return {"message": "User registered successfully"}
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
 

@@ -1,9 +1,11 @@
 // frontend/src/App.js
+
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import AuthContext, { AuthProvider } from './context/AuthContext';
+import AuthContext from './context/AuthContext';
 import Header from './components/Header';
 import Login from './components/Login';
+import Register from './components/Register'; // Import Register
 import Chat from './components/Chat';
 import AddFriend from './components/AddFriend';
 
@@ -23,6 +25,7 @@ function App() {
                 ) : (
                     <>
                         <Route path="/" element={<Login onLogin={handleLogin} />} />
+                        <Route path="/register" element={<Register />} /> {/* Add Register Route */}
                         <Route path="*" element={<Navigate to="/" />} />
                     </>
                 )}

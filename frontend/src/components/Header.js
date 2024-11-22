@@ -2,7 +2,6 @@
 
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Logo from '../assets/logo_tran.svg'; // Default import for SVG
 import AuthContext from '../context/AuthContext';
 import Button from './Button';
 
@@ -24,7 +23,7 @@ function Header({ onLogout }) {
                 className="flex items-center cursor-pointer"
                 onClick={handleLogoClick}
             >
-                <h1 className="text-accent text-3xl font-bold">Skuggsnack</h1>
+                <h1 className="text-accent text-3xl font-bold ">Skuggsnack</h1>
             </div>
             {token && (
                 <div className="flex items-center">

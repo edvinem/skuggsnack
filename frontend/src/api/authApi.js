@@ -1,10 +1,15 @@
 // frontend/src/api/authApi.js
+
 import axios from 'axios';
 
 const authApi = axios.create({
-    baseURL: '/auth',
+    baseURL: '/auth', // Proxy handled by Nginx
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
+// Optional: Add interceptors for handling tokens
 authApi.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -13,7 +18,9 @@ authApi.interceptors.request.use(
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => {
+        return Promise.reject(error);
+    }
 );
 
 export default authApi;
