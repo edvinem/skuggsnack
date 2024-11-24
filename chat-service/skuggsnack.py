@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 # MongoDB connection
-client = pymongo.MongoClient("mongodb://mongo:27017/")
+client = pymongo.MongoClient("mongodb://mongodb:27017/skuggsnack")
 db = client["skuggsnack"]
 messages_collection = db["messages"]
 

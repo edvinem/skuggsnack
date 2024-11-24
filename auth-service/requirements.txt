@@ -1,7 +1,8 @@
 fastapi>=0.100.0
 uvicorn
 pymongo
-passlib[bcrypt]==1.7.4
+passlib[bcrypt]==latest
 python-jose
 python-multipart
 pydantic>=2.0.0
+bcrypt==latest

@@ -32,7 +32,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 # MongoDB connection
-client = pymongo.MongoClient("mongodb://mongo:27017/")
+client = pymongo.MongoClient("mongodb://mongodb:27017/skuggsnack")
 db = client["skuggsnack"]
 users_collection = db["users"]
 
