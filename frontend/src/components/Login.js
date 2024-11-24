@@ -11,19 +11,28 @@ function Login({ onLogin }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!username || !password) {
+            setError("Username and password are required.");
+            return;
+        }
+
         try {
+            const payload = { username, password };
+            console.log("Sending payload:", payload); // Debugging log
+
             const response = await fetch('/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify(payload),
             });
 
             const contentType = response.headers.get('content-type');
             if (response.ok && contentType && contentType.includes('application/json')) {
                 const data = await response.json();
-                handleLogin(data.token);
+                handleLogin(data.access_token); // Adjusted to match API response key
             } else {
                 const errorText = await response.text();
+                console.error("Error response:", errorText); // Debugging
                 setError(errorText || 'Login failed');
             }
         } catch (err) {
@@ -31,6 +40,8 @@ function Login({ onLogin }) {
             setError('An error occurred. Please try again.');
         }
     };
+
+
 
 
     return (

@@ -23,7 +23,12 @@ app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 # MongoDB connection
-client = pymongo.MongoClient("mongodb://mongodb:27017/skuggsnack")
+client = pymongo.MongoClient(
+    "mongodb://mongodb:27017/skuggsnack",
+    maxPoolSize=50,  # Adjust based on your load
+    minPoolSize=10
+)
+
 db = client["skuggsnack"]
 messages_collection = db["messages"]
 

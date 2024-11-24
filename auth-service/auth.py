@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
@@ -32,7 +32,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 # MongoDB connection
-client = pymongo.MongoClient("mongodb://mongodb:27017/skuggsnack")
+client = pymongo.MongoClient(
+    "mongodb://mongodb:27017/skuggsnack",
+    maxPoolSize=50,  # Adjust based on your load
+    minPoolSize=10
+)
+
 db = client["skuggsnack"]
 users_collection = db["users"]
 
@@ -115,6 +120,7 @@ def register(user: UserIn):
 @app.post("/auth/login", response_model=Token)
 def login(user: UserIn):
     try:
+        print("Received payload:", user.dict())  # Debugging log
         db_user = users_collection.find_one({"username": user.username})
         if not db_user:
             raise HTTPException(status_code=400, detail="Invalid credentials")
@@ -129,6 +135,9 @@ def login(user: UserIn):
         token_data = {"sub": user.username}
         token = create_access_token(data=token_data, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
         return {"access_token": token, "token_type": "bearer"}
+    except ValidationError as e:
+        print("Validation error:", e.json())  # Debugging log
+        raise HTTPException(status_code=422, detail="Invalid input format")
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
 
@@ -136,8 +145,8 @@ def login(user: UserIn):
 def get_current_user(token: str = Depends(oauth2_scheme)):
     username = verify_token(token)
     user = users_collection.find_one({"username": username})
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found.")
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid token")
     return {"username": user["username"], "friends": user.get("friends", [])}
 
 @app.post("/auth/add_friend", response_model=Message)
