@@ -92,7 +92,6 @@ def get_messages(recipient: str, token: str = Depends(oauth2_scheme)):
         msg["_id"] = str(msg["_id"])
     return messages
 
-
 @app.post("/send_message", response_model=MessageResponse)
 def send_message(message: MessageCreate, token: str = Depends(oauth2_scheme)):
     try:
@@ -113,7 +112,6 @@ def send_message(message: MessageCreate, token: str = Depends(oauth2_scheme)):
     except Exception as e:
         logger.error(f"Error in send_message: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
-
 
 @app.post("/create_channel", response_model=Dict[str, str])
 def create_channel(channel: Channel, token: str = Depends(oauth2_scheme)):

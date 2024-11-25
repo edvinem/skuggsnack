@@ -1,21 +1,17 @@
-// frontend/src/components/Chat.js
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import SideBar from './SideBar';
 import ChatWindow from './ChatWindow';
+import AuthContext from '../context/AuthContext';
 
 function Chat() {
-    const [recipient, setRecipient] = useState(null);
-
-    const handleSelectFriend = (friendUsername) => {
-        setRecipient(friendUsername);
-    };
+    const { selectedFriend } = useContext(AuthContext);
 
     return (
         <div className="flex flex-1 h-full">
-            <SideBar onSelectFriend={handleSelectFriend} />
+            <SideBar />
             <div className="flex flex-1">
-                {recipient ? (
-                    <ChatWindow recipient={recipient} />
+                {selectedFriend ? (
+                    <ChatWindow recipient={selectedFriend} />
                 ) : (
                     <div className="flex flex-1 items-center justify-center bg-gray-100">
                         <p className="text-gray-500">Select a friend to start chatting.</p>

@@ -1,27 +1,51 @@
 // frontend/src/components/SideBar.js
-import React, { useContext } from 'react';
+
+import React, { useContext, useState, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
 
-function SideBar({ onSelectFriend }) {
-    const { friends } = useContext(AuthContext);
+function SideBar() {
+    const { friends, fetchFriends, setSelectedFriend } = useContext(AuthContext);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredFriends, setFilteredFriends] = useState([]);
+
+    useEffect(() => {
+        fetchFriends();
+    }, [fetchFriends]);
+
+    useEffect(() => {
+        setFilteredFriends(
+            friends.filter(friend => friend.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+    }, [searchTerm, friends]);
+
+    const handleSelectFriend = (friend) => {
+        setSelectedFriend(friend);
+    };
 
     return (
         <aside className="w-64 bg-gray-800 text-white p-4 overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Friends</h2>
-            {friends && friends.length > 0 ? (
+            <input
+                type="text"
+                placeholder="Search friends..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-2 py-1 mb-4 text-black rounded"
+            />
+            {filteredFriends && filteredFriends.length > 0 ? (
                 <ul>
-                    {friends.map((friend) => (
+                    {filteredFriends.map((friend) => (
                         <li
                             key={friend}
                             className="mb-2 cursor-pointer hover:text-blue-400"
-                            onClick={() => onSelectFriend(friend)}
+                            onClick={() => handleSelectFriend(friend)}
                         >
                             {friend}
                         </li>
                     ))}
                 </ul>
             ) : (
-                <p className="text-gray-400">No friends yet.</p>
+                <p className="text-gray-400">No friends found.</p>
             )}
         </aside>
     );

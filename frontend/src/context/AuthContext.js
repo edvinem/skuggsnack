@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import authApi from '../api/authApi';
+import chatApi from '../api/chatApi';
 
 const AuthContext = createContext();
 
@@ -10,6 +11,7 @@ export const AuthProvider = ({ children }) => {
     });
     const [user, setUser] = useState(null);
     const [friends, setFriends] = useState([]);
+    const [selectedFriend, setSelectedFriend] = useState(null);
 
     const handleLogin = (newToken) => {
         setToken(newToken);
@@ -21,9 +23,21 @@ export const AuthProvider = ({ children }) => {
             try {
                 const response = await authApi.get('/me');
                 setUser(response.data);
+                setFriends(response.data.friends);
             } catch (err) {
                 console.error('Failed to fetch user data:', err);
                 handleLogout();
+            }
+        }
+    };
+
+    const fetchFriends = async () => {
+        if (token) {
+            try {
+                const response = await authApi.get('/friends');
+                setFriends(response.data);
+            } catch (err) {
+                console.error('Failed to fetch friends:', err);
             }
         }
     };
@@ -32,6 +46,7 @@ export const AuthProvider = ({ children }) => {
         setToken('');
         setUser(null);
         setFriends([]);
+        setSelectedFriend(null);
         localStorage.removeItem('token');
     };
 
@@ -41,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     }, [token]);
 
     return (
-        <AuthContext.Provider value={{ token, user, friends, handleLogin, handleLogout, fetchUserData }}>
+        <AuthContext.Provider value={{ token, user, friends, selectedFriend, setSelectedFriend, handleLogin, handleLogout, fetchFriends }}>
             {children}
         </AuthContext.Provider>
     );

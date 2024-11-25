@@ -1,4 +1,3 @@
-// frontend/src/components/ChatWindow.js
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import chatApi from '../api/chatApi';
 import AuthContext from '../context/AuthContext';

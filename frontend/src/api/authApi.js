@@ -9,7 +9,7 @@ const authApi = axios.create({
     },
 });
 
-// Optional: Add interceptors for handling tokens
+// Add interceptors for handling tokens
 authApi.interceptors.request.use(
     (config) => {
         if (!config.url.includes('/auth/login') && !config.url.includes('/auth/register')) {
@@ -24,8 +24,5 @@ authApi.interceptors.request.use(
     },
     (error) => Promise.reject(error)
 );
-
-
-
 
 export default authApi;
