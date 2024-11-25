@@ -1,6 +1,7 @@
 // frontend/src/components/AddFriend.js
 import React, { useState, useEffect } from 'react';
 import authApi from '../api/authApi';
+import Button from './Button';
 
 function AddFriend() {
     const [username, setUsername] = useState('');
@@ -56,7 +57,7 @@ function AddFriend() {
     };
 
     return (
-        <div className="p-4 bg-gray-800 min-h-screen text-white">
+        <div className="p-4 bg-primary min-h-screen text-white">
             <h2 className="text-2xl font-bold mb-4">Add Friend</h2>
             {successMessage && <div className="text-green-500 mb-2">{successMessage}</div>}
             {error && <div className="text-red-500 mb-2">{error}</div>}
@@ -68,12 +69,7 @@ function AddFriend() {
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full px-3 py-2 mb-2 border rounded bg-gray-700 text-white"
                 />
-                <button
-                    type="submit"
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                    Send Friend Request
-                </button>
+                <Button type="primary" className="w-full px-4 py-2 border-[#3BBA9C] text-lg">Send Friend Request</Button>
             </form>
             <h3 className="text-xl font-semibold mb-2">Pending Friend Requests</h3>
             {friendRequests.length === 0 ? (
@@ -83,17 +79,15 @@ function AddFriend() {
                     {friendRequests.map((username) => (
                         <li key={username} className="flex justify-between items-center mb-2">
                             <span>{username}</span>
-                            <button
-                                onClick={() => handleAcceptFriendRequest(username)}
-                                className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                            >
+                            <Button type="accent" onClick={() => handleAcceptFriendRequest(username)}>
                                 Accept
-                            </button>
+                            </Button>
                         </li>
                     ))}
                 </ul>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
 

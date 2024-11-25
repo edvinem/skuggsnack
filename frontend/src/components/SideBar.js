@@ -30,7 +30,7 @@ function SideBar() {
                 placeholder="Search friends..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-2 py-1 mb-4 text-black rounded"
+                className="w-full px-3 py-2 mb-2 border rounded bg-gray-700 text-white"
             />
             {filteredFriends && filteredFriends.length > 0 ? (
                 <ul>
