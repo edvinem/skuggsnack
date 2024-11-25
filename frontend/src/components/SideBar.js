@@ -23,7 +23,7 @@ function SideBar() {
     };
 
     return (
-        <aside className="w-64 bg-gray-800 text-white p-4 overflow-y-auto">
+        <aside className="w-64 bg-primary text-white p-4 overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Friends</h2>
             <input
                 type="text"

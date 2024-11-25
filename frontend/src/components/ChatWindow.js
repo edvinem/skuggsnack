@@ -1,3 +1,4 @@
+// frontend/src/components/ChatWindow.js
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import chatApi from '../api/chatApi';
 import AuthContext from '../context/AuthContext';
@@ -60,7 +61,7 @@ function ChatWindow({ recipient }) {
     };
 
     return (
-        <div className="flex flex-col flex-1 bg-gray-100">
+        <div className="flex flex-col flex-1 bg-primary">
             <div className="flex-1 overflow-y-auto p-4">
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
@@ -82,7 +83,7 @@ function ChatWindow({ recipient }) {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            <form onSubmit={handleSendMessage} className="flex p-4 bg-white border-t border-gray-200">
+            <form onSubmit={handleSendMessage} className="flex p-4 bg-primary border-t border-gray-200">
                 <input
                     type="text"
                     placeholder="Type your message..."

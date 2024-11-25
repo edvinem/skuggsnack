@@ -13,7 +13,7 @@ function Chat() {
                 {selectedFriend ? (
                     <ChatWindow recipient={selectedFriend} />
                 ) : (
-                    <div className="flex flex-1 items-center justify-center bg-gray-100">
+                    <div className="flex flex-1 items-center justify-center bg-primary">
                         <p className="text-gray-500">Select a friend to start chatting.</p>
                     </div>
                 )}

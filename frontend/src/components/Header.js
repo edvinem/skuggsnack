@@ -23,14 +23,14 @@ function Header({ onLogout }) {
                 className="flex items-center cursor-pointer"
                 onClick={handleLogoClick}
             >
-                <h1 className="text-accent text-3xl font-bold ">Skuggsnack</h1>
+                <h1 className="text-accent text-3xl font-bold">Skuggsnack</h1>
             </div>
             {token && (
-                <div className="flex items-center">
+                <div className="flex items-center space-x-2">
                     <Link to="/add-friend">
                         <Button type="secondary">Add Friend</Button>
                     </Link>
-                    <Button type="accent" onClick={onLogout} className="ml-2">
+                    <Button type="accent" onClick={onLogout}>
                         Logout
                     </Button>
                 </div>
