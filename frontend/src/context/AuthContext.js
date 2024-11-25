@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import authApi from '../api/authApi';
 import chatApi from '../api/chatApi';
 
@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', newToken);
     };
 
-    const fetchUserData = async () => {
+    const fetchUserData = useCallback(async () => {
         if (token) {
             try {
                 const response = await authApi.get('/me');
@@ -29,9 +29,9 @@ export const AuthProvider = ({ children }) => {
                 handleLogout();
             }
         }
-    };
+    }, [token]);
 
-    const fetchFriends = async () => {
+    const fetchFriends = useCallback(async () => {
         if (token) {
             try {
                 const response = await authApi.get('/friends');
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
                 console.error('Failed to fetch friends:', err);
             }
         }
-    };
+    }, [token]);
 
     const handleLogout = () => {
         setToken('');
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         console.log('Current Token:', token);
         fetchUserData();
-    }, [token]);
+    }, [token, fetchUserData]);
 
     return (
         <AuthContext.Provider value={{ token, user, friends, selectedFriend, setSelectedFriend, handleLogin, handleLogout, fetchFriends }}>

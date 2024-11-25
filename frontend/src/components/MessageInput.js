@@ -1,6 +1,6 @@
 // frontend/src/components/MessageInput.js
 import React, { useState } from 'react';
-import { FiSend } from 'react-icons/fi'; // Optional: Add icons
+import Button from './Button';
 
 function MessageInput({ onSend }) {
     const [message, setMessage] = useState('');
@@ -21,9 +21,7 @@ function MessageInput({ onSend }) {
                 onChange={(e) => setMessage(e.target.value)}
                 className="w-full px-3 py-2 mb-2 border rounded bg-gray-700 text-white"
             />
-            <button type="submit" className="px-4 py-2 text-white bg-blue-600 rounded-r-md hover:bg-blue-700">
-                <FiSend size={20} />
-            </button>
+            <Button type="primary" className="w-full py-2 border-[#3BBA9C] text-lg">Send</Button>
         </form>
     );
 }

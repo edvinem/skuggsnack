@@ -1,5 +1,5 @@
 # Stage 1: Build React app
-FROM node:16-alpine as build
+FROM node:23-alpine as build
 
 WORKDIR /app
 
@@ -27,6 +27,11 @@ COPY --from=build /app/build /usr/share/nginx/html
 
 # Copy custom Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
+
+RUN touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80

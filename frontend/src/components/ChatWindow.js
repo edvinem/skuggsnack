@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import chatApi from '../api/chatApi';
 import AuthContext from '../context/AuthContext';
+import Button from './Button';
 
 function ChatWindow({ recipient }) {
     const { user } = useContext(AuthContext);
@@ -83,17 +84,18 @@ function ChatWindow({ recipient }) {
                 )}
                 <div ref={messagesEndRef} />
             </div>
-            <form onSubmit={handleSendMessage} className="flex p-4 bg-primary border-t border-gray-200">
+            <form onSubmit={handleSendMessage} className="flex items-center p-4 bg-primary space-x-2">
+                <label htmlFor="message-input" className="sr-only">Message</label>
                 <input
                     type="text"
                     placeholder="Type your message..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    className="flex-1 px-4 py-2 mr-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                     type="submit"
-                    className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-4 py-2 text-lg font-semibold text-white bg-blue-600 rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary-dark"
                 >
                     Send
                 </button>

@@ -1,5 +1,3 @@
-// frontend/src/components/SideBar.js
-
 import React, { useContext, useState, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
 

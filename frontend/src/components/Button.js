@@ -24,7 +24,7 @@ function Button({ type = 'primary', children, className = '', ...props }) {
             break;
         case 'primary':
         default:
-            bgColor = 'bg-primary';
+            bgColor = 'bg-primary-dark';
             hoverBgColor = 'hover:bg-primary-dark';
             focusRingColor = 'focus:ring-primary-dark';
             borderColor = 'border-primary';
