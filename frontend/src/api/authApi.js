@@ -3,13 +3,12 @@
 import axios from 'axios';
 
 const authApi = axios.create({
-    baseURL: '/auth', // Proxy handled by Nginx
+    baseURL: '/auth',
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Add interceptors for handling tokens
 authApi.interceptors.request.use(
     (config) => {
         if (!config.url.includes('/auth/login') && !config.url.includes('/auth/register')) {

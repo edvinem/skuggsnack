@@ -4,11 +4,11 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from './Button';
 import AuthContext from '../context/AuthContext';
-import authApi from '../api/authApi'; // Ensure you have this setup
+import authApi from '../api/authApi';
 
 function Register() {
     const navigate = useNavigate();
-    const { handleLogin } = useContext(AuthContext); // Optional: Auto-login after registration
+    const { handleLogin } = useContext(AuthContext);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,10 +32,7 @@ function Register() {
                 setUsername('');
                 setPassword('');
                 setConfirmPassword('');
-                // Optionally, redirect to login page after a short delay
                 setTimeout(() => navigate('/'), 2000);
-                // Optionally, auto-login the user
-                // handleLogin(response.data.token);
             } else {
                 setError(response.data.detail || 'Registration failed.');
             }

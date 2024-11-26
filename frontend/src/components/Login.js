@@ -18,7 +18,7 @@ function Login({ onLogin }) {
 
         try {
             const payload = { username, password };
-            console.log("Sending payload:", payload); // Debugging log
+            console.log("Sending payload:", payload);
 
             const response = await fetch('/auth/login', {
                 method: 'POST',
@@ -29,10 +29,10 @@ function Login({ onLogin }) {
             const contentType = response.headers.get('content-type');
             if (response.ok && contentType && contentType.includes('application/json')) {
                 const data = await response.json();
-                handleLogin(data.access_token); // Adjusted to match API response key
+                handleLogin(data.access_token);
             } else {
                 const errorText = await response.text();
-                console.error("Error response:", errorText); // Debugging
+                console.error("Error response:", errorText);
                 setError(errorText || 'Login failed');
             }
         } catch (err) {

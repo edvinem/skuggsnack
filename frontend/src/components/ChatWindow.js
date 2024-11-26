@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import chatApi from '../api/chatApi';
 import AuthContext from '../context/AuthContext';
-import Button from './Button';
 
 function ChatWindow({ recipient }) {
     const { user } = useContext(AuthContext);
@@ -44,7 +43,7 @@ function ChatWindow({ recipient }) {
             const payload = {
                 recipient,
                 content: newMessage,
-                recipient_type: 'user', // Ensure recipient_type is correctly set
+                recipient_type: 'user',
             };
             const response = await chatApi.post('/send_message', payload);
             setMessages([...messages, response.data]);
@@ -95,7 +94,7 @@ function ChatWindow({ recipient }) {
                 />
                 <button
                     type="submit"
-                    className="px-4 py-2 text-lg font-semibold text-white bg-blue-600 rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary-dark"
+                    className="px-4 py-2 text-lg font-semibold text-white bg-primary-dark rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary-dark"
                 >
                     Send
                 </button>

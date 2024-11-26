@@ -48,9 +48,7 @@ function AddFriend() {
         try {
             const response = await authApi.post('/accept_friend_request', { requesting_username: requestingUsername });
             setSuccessMessage(response.data.message);
-            // Remove the accepted request from the list
             setFriendRequests(friendRequests.filter((u) => u !== requestingUsername));
-            // Optionally, refresh the friends list in AuthContext
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to accept friend request');
         }

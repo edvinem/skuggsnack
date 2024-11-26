@@ -16,14 +16,14 @@ function App() {
             <Header onLogout={handleLogout} />
             <Routes>
                 {token ? (
-                    // Routes for authenticated users
+                    // authenticated users
                     <>
                         <Route path="/chat" element={<Chat />} />
                         <Route path="/add-friend" element={<AddFriend />} />
                         <Route path="*" element={<Navigate to="/chat" />} />
                     </>
                 ) : (
-                    // Routes for unauthenticated users
+                    // unauthenticated users
                     <>
                         <Route path="/" element={<Login onLogin={handleLogin} />} />
                         <Route path="/register" element={<Register />} />

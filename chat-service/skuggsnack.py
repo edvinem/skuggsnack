@@ -9,35 +9,29 @@ from bson import ObjectId
 from fastapi.security import OAuth2PasswordBearer
 import logging
 
-# Configuration
 SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"
 ALGORITHM = "HS256"
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
-# FastAPI initialization
 app = FastAPI()
-
-# OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# MongoDB connection
 client = pymongo.MongoClient(
     "mongodb://mongodb:27017/skuggsnack",
-    maxPoolSize=50,  # Adjust based on your load
+    maxPoolSize=50,
     minPoolSize=10
 )
 
 db = client["skuggsnack"]
 messages_collection = db["messages"]
 
-# Pydantic models
 class Message(BaseModel):
     sender: str
     recipient: str
     content: str
-    recipient_type: str  # 'user' or 'channel'
+    recipient_type: str 
     timestamp: datetime = datetime.now(timezone.utc)
 
 class MessageResponse(BaseModel):
@@ -53,7 +47,7 @@ class MessageResponse(BaseModel):
 class MessageCreate(BaseModel):
     recipient: str
     content: str
-    recipient_type: str  # e.g., 'user' or 'group'
+    recipient_type: str
 
 class Channel(BaseModel):
     name: str
@@ -78,7 +72,6 @@ def verify_token(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# API Endpoints
 @app.get("/get_messages/{recipient}", response_model=List[MessageResponse])
 def get_messages(recipient: str, token: str = Depends(oauth2_scheme)):
     sender = verify_token(token)
@@ -99,7 +92,6 @@ def send_message(message: MessageCreate, token: str = Depends(oauth2_scheme)):
         if not username:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-        # Save the message to the database
         message_data = {
             "sender": username,
             "recipient": message.recipient,
@@ -117,7 +109,6 @@ def send_message(message: MessageCreate, token: str = Depends(oauth2_scheme)):
 def create_channel(channel: Channel, token: str = Depends(oauth2_scheme)):
     user = verify_token(token)
     try:
-        # Save channel to MongoDB
         db["channels"].insert_one(channel.model_dump())
         return {"message": "Channel created successfully"}
     except ConnectionFailure:
@@ -127,7 +118,6 @@ def create_channel(channel: Channel, token: str = Depends(oauth2_scheme)):
 def create_group(group: Group, token: str = Depends(oauth2_scheme)):
     user = verify_token(token)
     try:
-        # Save group to MongoDB
         db["groups"].insert_one(group.model_dump())
         return {"message": "Group created successfully"}
     except ConnectionFailure:
@@ -139,7 +129,7 @@ def get_channel_messages(channel_name: str, token: str = Depends(oauth2_scheme))
     try:
         messages = list(messages_collection.find({"recipient": channel_name, "recipient_type": "channel"}))
         for message in messages:
-            message["_id"] = str(message["_id"])  # Convert ObjectId to string for JSON serialization
+            message["_id"] = str(message["_id"])
         return messages
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
@@ -150,7 +140,7 @@ def get_group_messages(group_name: str, token: str = Depends(oauth2_scheme)):
     try:
         messages = list(messages_collection.find({"recipient": group_name, "recipient_type": "group"}))
         for message in messages:
-            message["_id"] = str(message["_id"])  # Convert ObjectId to string for JSON serialization
+            message["_id"] = str(message["_id"])
         return messages
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")

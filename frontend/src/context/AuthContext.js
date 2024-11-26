@@ -7,7 +7,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(() => {
         const storedToken = localStorage.getItem('token');
-        return storedToken ? storedToken : ''; // Fallback to empty string
+        return storedToken ? storedToken : '';
     });
     const [user, setUser] = useState(null);
     const [friends, setFriends] = useState([]);

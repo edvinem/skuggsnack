@@ -10,31 +10,26 @@ from pymongo.errors import ConnectionFailure
 from fastapi.security import OAuth2PasswordBearer
 
 # Configuration
-SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"  # Replace with your actual secret key
+SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Initialize FastAPI
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to your needs
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# MongoDB connection
 client = pymongo.MongoClient(
     "mongodb://mongodb:27017/skuggsnack",
-    maxPoolSize=50,  # Adjust based on your load
+    maxPoolSize=50,
     minPoolSize=10
 )
 
@@ -68,7 +63,6 @@ class FriendRequest(BaseModel):
 class AcceptFriendRequest(BaseModel):
     requesting_username: str
 
-# Utility functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -99,7 +93,6 @@ def verify_token(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# API Endpoints
 @app.post("/auth/register", response_model=Message)
 def register(user: UserIn):
     try:
@@ -120,7 +113,7 @@ def register(user: UserIn):
 @app.post("/auth/login", response_model=Token)
 def login(user: UserIn):
     try:
-        print("Received payload:", user.dict())  # Debugging log
+        print("Received payload:", user.model_dump())
         db_user = users_collection.find_one({"username": user.username})
         if not db_user:
             raise HTTPException(status_code=400, detail="Invalid credentials")
@@ -136,7 +129,7 @@ def login(user: UserIn):
         token = create_access_token(data=token_data, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
         return {"access_token": token, "token_type": "bearer"}
     except ValidationError as e:
-        print("Validation error:", e.json())  # Debugging log
+        print("Validation error:", e.json())
         raise HTTPException(status_code=422, detail="Invalid input format")
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
@@ -188,11 +181,9 @@ def send_friend_request(request: FriendRequest, token: str = Depends(oauth2_sche
     if not friend_user:
         raise HTTPException(status_code=404, detail="User not found.")
 
-    # Check if already friends
     if current_username in friend_user.get("friends", []):
         raise HTTPException(status_code=400, detail="You are already friends with this user.")
 
-    # Check if request already sent
     if current_username in friend_user.get("friend_requests", []):
         raise HTTPException(status_code=400, detail="Friend request already sent.")
 
@@ -211,7 +202,6 @@ def accept_friend_request(request: AcceptFriendRequest, token: str = Depends(oau
     if requesting_username not in user.get("friend_requests", []):
         raise HTTPException(status_code=400, detail="No friend request from this user.")
 
-    # Add each other as friends
     users_collection.update_one(
         {"username": current_username},
         {
@@ -225,11 +215,9 @@ def accept_friend_request(request: AcceptFriendRequest, token: str = Depends(oau
     )
     return {"message": "Friend request accepted."}
 
-# Health Check Endpoint
 @app.get("/health")
 def health_check():
     try:
-        # Attempt a simple operation to verify database connectivity
         client.admin.command('ping')
         return {"status": "healthy"}
     except ConnectionFailure:
