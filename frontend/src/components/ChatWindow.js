@@ -1,5 +1,5 @@
 // frontend/src/components/ChatWindow.js
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import chatApi from '../api/chatApi';
 import AuthContext from '../context/AuthContext';
 
@@ -8,15 +8,10 @@ function ChatWindow({ recipient }) {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [error, setError] = useState('');
-    const messagesEndRef = useRef(null);
 
     useEffect(() => {
         fetchMessages();
     }, [recipient]);
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
 
     const fetchMessages = async () => {
         if (!recipient) return;
@@ -54,15 +49,9 @@ function ChatWindow({ recipient }) {
         }
     };
 
-    const scrollToBottom = () => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
     return (
-        <div className="flex flex-col flex-1 bg-primary">
-            <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex flex-col flex-1 h-full bg-primary">
+            <div className="p-4">
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
                         <div
@@ -81,9 +70,8 @@ function ChatWindow({ recipient }) {
                 ) : (
                     <p className="text-center text-gray-500">No messages yet. Start the conversation!</p>
                 )}
-                <div ref={messagesEndRef} />
             </div>
-            <form onSubmit={handleSendMessage} className="flex items-center p-4 bg-primary space-x-2">
+            <form onSubmit={handleSendMessage} className="flex-shrink-0 flex items-center p-4 bg-primary space-x-2">
                 <label htmlFor="message-input" className="sr-only">Message</label>
                 <input
                     type="text"

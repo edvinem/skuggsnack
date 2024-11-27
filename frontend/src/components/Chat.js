@@ -7,7 +7,7 @@ function Chat() {
     const { selectedFriend } = useContext(AuthContext);
 
     return (
-        <div className="flex flex-1 h-full">
+        <div className="flex h-screen">
             <SideBar />
             <div className="flex flex-1">
                 {selectedFriend ? (
