@@ -1,0 +1,48 @@
+info:
+kubectl get pods -n skuggsnack
+
+# port forward for windows machine (all)
+kubectl port-forward -n skuggsnack --address 0.0.0.0 service/frontend 31080:80 
+
+# Build and Push
+cd auth-service
+docker build -t edvinem/auth-service:latest .
+cd ../chat-service
+docker build -t edvinem/chat-service:latest .
+cd ../frontend
+docker build -t edvinem/frontend:latest .
+
+docker push edvinem/auth-service:latest
+docker push edvinem/chat-service:latest
+docker push edvinem/frontend:latest
+
+# Apply Kubernetes Manifests
+
+kubectl apply -f namespace.yaml
+kubectl apply -f auth-secrets.yaml
+kubectl apply -f mongodb-pvc.yaml
+kubectl apply -f mongodb-deployment.yaml
+kubectl apply -f mongodb-service.yaml
+kubectl apply -f auth-deployment.yaml
+kubectl apply -f auth-service.yaml
+kubectl apply -f chat-deployment.yaml
+kubectl apply -f chat-service.yaml
+kubectl apply -f frontend-deployment.yaml
+kubectl apply -f frontend-service.yaml
+kubectl apply -f ingress.yamlme
+
+Deployable using Kubernetes: Yes, all manifests are provided and can be applied to a Kubernetes cluster.
+
+At least two microservices and a database: Auth Service and Chat Service are two microservices; MongoDB is the database.
+
+Each microservice implements a REST API: Both services expose RESTful APIs.
+
+Accessible from outside Kubernetes: The app expose the frontend service on NodePort 31080, 
+and Traefik routes external HTTPS requests from http://skuggsnack.emarcusson.se.
+
+Horizontally scalable microservices: Auth Service and Chat Service have replicas set to 2 and can be scaled independently.
+
+Images pushed to Docker Hub: Pushed
+
+Database as a separate microservice: MongoDB runs as its own deployment and service.
+

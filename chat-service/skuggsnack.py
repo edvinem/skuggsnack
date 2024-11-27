@@ -7,25 +7,26 @@ from datetime import datetime, timezone
 from jose import JWTError, jwt
 from bson import ObjectId
 from fastapi.security import OAuth2PasswordBearer
+import os
 import logging
 
 SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"
 ALGORITHM = "HS256"
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-client = pymongo.MongoClient(
-    "mongodb://mongodb:27017/skuggsnack",
-    maxPoolSize=50,
-    minPoolSize=10
-)
-
-db = client["skuggsnack"]
-messages_collection = db["messages"]
+try:
+    client = pymongo.MongoClient(os.environ.get("MONGO_URI"))
+    db = client["skuggsnack"]
+    messages_collection = db["messages"]
+    logger.info("Successfully connected to MongoDB")
+except Exception as e:
+    logger.error(f"Failed to connect to MongoDB: {e}")
+    raise HTTPException(status_code=500, detail="Database connection failed.")
 
 class Message(BaseModel):
     sender: str
@@ -42,7 +43,7 @@ class MessageResponse(BaseModel):
     recipient_type: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MessageCreate(BaseModel):
     recipient: str
@@ -84,6 +85,7 @@ def get_messages(recipient: str, token: str = Depends(oauth2_scheme)):
     for msg in messages:
         msg["_id"] = str(msg["_id"])
     return messages
+
 
 @app.post("/send_message", response_model=MessageResponse)
 def send_message(message: MessageCreate, token: str = Depends(oauth2_scheme)):

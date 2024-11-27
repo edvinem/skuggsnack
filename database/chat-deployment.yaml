@@ -15,10 +15,14 @@ spec:
     spec:
       containers:
       - name: chat-service
-        image: yourdockerhubusername/chat-service:latest
+        image: edvinem/chat-service:latest
         ports:
         - containerPort: 9001
         env:
+        - name: MONGO_URI
+          value: mongodb://mongo:27017/skuggsnack
+        - name: PORT
+          value: "9001"
         - name: SECRET_KEY
           valueFrom:
             secretKeyRef:

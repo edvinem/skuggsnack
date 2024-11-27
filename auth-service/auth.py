@@ -4,10 +4,12 @@ from pydantic import BaseModel, ValidationError
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
+import os
 import pymongo
 from typing import List
 from pymongo.errors import ConnectionFailure
 from fastapi.security import OAuth2PasswordBearer
+import logging
 
 # Configuration
 SECRET_KEY = "amFnaGFyZW5qw6R2bGFtYXNzYW55Y2tsYXJpY2xlYXJ0ZXh0cMOlbWluc2VydmVy"
@@ -15,6 +17,10 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 app = FastAPI()
+
+# Logging cause kubernetes doesn't find my auth-service
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,14 +33,14 @@ app.add_middleware(
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-client = pymongo.MongoClient(
-    "mongodb://mongodb:27017/skuggsnack",
-    maxPoolSize=50,
-    minPoolSize=10
-)
-
-db = client["skuggsnack"]
-users_collection = db["users"]
+try:
+    client = pymongo.MongoClient(os.environ.get("MONGO_URI"))
+    db = client["skuggsnack"]
+    users_collection = db["users"]
+    logger.info("Successfully connected to MongoDB")
+except Exception as e:
+    logger.error(f"Failed to connect to MongoDB: {e}")
+    raise HTTPException(status_code=500, detail="Database connection failed.")
 
 class UserIn(BaseModel):
     username: str
@@ -107,6 +113,9 @@ def register(user: UserIn):
         }
         users_collection.insert_one(user_data)
         return {"message": "User registered successfully"}
+    except Exception as e:
+        logger.error(f"Error during user registration: {e}")
+        raise HTTPException(status_code=500, detail="User registration failed.")
     except ConnectionFailure:
         raise HTTPException(status_code=500, detail="Failed to connect to the database.")
 

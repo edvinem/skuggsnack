@@ -15,10 +15,14 @@ spec:
     spec:
       containers:
       - name: auth-service
-        image: yourdockerhubusername/auth-service:latest
+        image: edvinem/auth-service:latest
         ports:
         - containerPort: 9000
         env:
+        - name: MONGO_URI
+          value: mongodb://mongo:27017/skuggsnack
+        - name: PORT
+          value: "9000"
         - name: SECRET_KEY
           valueFrom:
             secretKeyRef:
