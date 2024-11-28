@@ -18,7 +18,6 @@ function Login({ onLogin }) {
 
         try {
             const payload = { username, password };
-            console.log("Sending payload:", payload);
 
             const response = await fetch('/auth/login', {
                 method: 'POST',
