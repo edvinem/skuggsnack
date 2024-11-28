@@ -40,16 +40,6 @@ class UserIn(BaseModel):
     username: str
     password: str
 
-class UserInDB(BaseModel):
-    username: str
-    hashed_password: str
-    friends: List[str] = []
-    friend_requests: List[str] = []
-
-class UserOut(BaseModel):
-    username: str
-    friends: List[str] = []
-
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -74,14 +64,6 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     expire = datetime.now(timezone.utc) + (expires_delta if expires_delta else timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-def authenticate_user(username: str, password: str):
-    user = users_collection.find_one({"username": username})
-    if not user:
-        return False
-    if not verify_password(password, user["hashed_password"]):
-        return False
-    return user
 
 def verify_token(token: str):
     try:

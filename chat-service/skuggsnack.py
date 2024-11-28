@@ -50,19 +50,6 @@ class MessageCreate(BaseModel):
     content: str
     recipient_type: str
 
-class Channel(BaseModel):
-    name: str
-    is_public: bool = True
-
-class Group(BaseModel):
-    name: str
-    members: List[str]
-
-class ConversationResponse(BaseModel):
-    participant: str
-    last_message: str
-    timestamp: datetime
-
 def verify_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
