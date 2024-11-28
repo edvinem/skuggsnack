@@ -1,8 +1,10 @@
-# Skuggsnack Design
+# Skuggsnack
 
-Skuggsnack is a simple web-based chat application that allows users to communicate in real-time. It provides a user-friendly interface where users can register, log in, and add friends. The name was chosen as the application would incorporate a tor gateway for traffic to ensure privacy. This was however not implemented. 
+Skuggsnack is a simple web-based chat application that allows users to communicate in real-time. It provides a user-friendly interface where users can register, log in, add friends and chat with them. The application uses Minikube for kubernetes deployment. The name was chosen as the application would incorporate a tor gateway for traffic to ensure privacy along side TLS encryption, E2EE, encryption at rest etc. This was however not implemented as it could be difficult considering the demand for kubernetes deployment and my lack of time for implementation and learning.
 
-The application uses Minikube for kubernetes deployment.
+
+### Source Code
+The source code is public and hosted on [github.com/edvinem/skuggsnack](https://github.com/edvinem/skuggsnack).
 
 ## Auth Service
 
@@ -254,39 +256,35 @@ The application uses Minikube for kubernetes deployment.
 # Architecture Principles and Cloud Patterns
 
 * Microservices Architecture
-  - Services (Frontend, Auth, Chat) are developed, deployed, and scaled independently.
-  - Promotes separation of concerns for easier maintenance and updates.
+  - My services (Frontend, Auth, Chat) are developed, deployed, and scaled independently.
+  - They are seperated for easier maintenance and updates.
 
 * Containerization
-  - Services are containerized using Docker, ensuring consistency across development, testing, and production environments.
+  - Services are containerized using Docker, whichs makes development and deployment consistent regardless of host OS, CPU architecture etc. 
 
 * Orchestration with Kubernetes
   - Manages deployment, scaling, and networking of containers.
-  - Utilizes resources like Deployments, Services, and ConfigMaps for efficient management.
+  - Utilizes resources like Deployments, Services, and ConfigMaps for management.
 
 * Service Discovery and Networking
-  - Services communicate using Kubernetes' internal DNS and ClusterIP services.
-  - Frontend is exposed externally via NodePort, allowing user access through a browser.
+  - Services communicate using Kubernetes internal DNS and ClusterIP services.
+  - Frontend is exposed externally via NodePort along side port-forwarding, allowing access through a browser.
 
 * Reverse Proxy with Traefik
-  - Traefik routes external requests to the appropriate NodePort service.
-  - Simplifies domain management and handles hostname-based routing.
+  - I used my personal reverse proxy for handeling hostname based routing.
 
 
 # Mapping Between Components and Microservices
 
 | Component        | Microservice   | Deployment File           | Service Type | Replicas | Dependencies                     |
 |------------------|----------------|---------------------------|--------------|----------|----------------------------------|
-| Frontend Service | frontend       | frontend-deployment.yaml  | ClusterIP    | 3        | Auth Service, Chat Service, MongoDB |
+| Frontend Service | frontend       | frontend-deployment.yaml  | nodePort    | 3        | Auth Service, Chat Service, MongoDB |
 | Auth Service     | auth-service   | auth-deployment.yaml      | ClusterIP    | 2        | MongoDB                          |
 | Chat Service     | chat-service   | chat-deployment.yaml      | ClusterIP    | 2        | Auth Service, MongoDB            |
 | MongoDB Database | mongodb        | mongodb-deployment.yaml   | ClusterIP    | 1        | -                                |
+---
+## Additional Insight
+### Frontend Service as NodePort
+The frontend needs to be accessible externally by users via a web browser. By using the `NodePort` service type, Kubernetes exposes the frontend service on a specific port of each node in the cluster. This allows me to access the application through `http://<NodeIP>:<NodePort>`. But in my kubernetes environment, using the NodePort service type did not not expose the service externally as expected. This is why I instead used kubectl port-forward to map the service port to my server, allowing me to access the application through `http://localhost:<Port>`.
 
-**Frontend Service as NodePort:**
-The frontend needs to be accessible externally by users via a web browser. By using the `NodePort` service type, Kubernetes exposes the frontend service on a specific port of each node in the cluster. This allows users to access the application through `http://<NodeIP>:<NodePort>`. But in my kubernetes environment, using the NodePort service type did not not expose the service externally as expected. This is why I instead used port-forwarding kubectl port-forward is used to map the service port to your local machine, allowing you to access the application through http://localhost:<Port>.
-
-so update this accordingly:
-**Frontend Service as NodePort:**
-The frontend needs to be accessible externally by users via a web browser. By using the `NodePort` service type, Kubernetes exposes the frontend service on a specific port of each node in the cluster. This allows users to access the application through `http://<NodeIP>:<NodePort>`.
-
-and explain why this is more thorogly, use illustrations or explain why this is. my server hosting kubernetes, me trying to access nodeIP from windows machine (remote sshing to server to code). Using nodeport could access so had to use port forwarding
+I believe this is because the NodeIP 192.168.49.2 is part of minikubes internal network, which is not routable externally. Minikube does not expose its internal NodePort to external networks which is why I need to use port-forwarding. 
