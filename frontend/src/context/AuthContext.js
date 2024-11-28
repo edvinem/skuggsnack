@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        console.log('Current Token:', token);
         fetchUserData();
     }, [token, fetchUserData]);
 
