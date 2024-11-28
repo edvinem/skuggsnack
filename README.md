@@ -8,7 +8,7 @@ Skuggsnack is a simple web-based chat application. It provides a user-friendly i
 - Database: MongoDB
 - Containerization: Docker
 - Orchestration: Kubernetes (Minikube)
-- Reverse Proxy: Nginx
+- Backend Reverse Proxy: Nginx
 
 ## (Personal) Deployment Steps
 1. **Clone the Repository**
