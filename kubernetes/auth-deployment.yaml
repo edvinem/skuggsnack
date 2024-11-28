@@ -14,8 +14,10 @@ spec:
         app: auth-service
     spec:
       containers:
+      containers:
       - name: auth-service
         image: edvinem/auth-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 9000
         env:

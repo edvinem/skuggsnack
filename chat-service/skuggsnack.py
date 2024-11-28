@@ -1,12 +1,10 @@
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
-from typing import List, Dict
-import pymongo
-from pymongo.errors import ConnectionFailure
+from typing import List
 from datetime import datetime, timezone
 from jose import JWTError, jwt
-from bson import ObjectId
 from fastapi.security import OAuth2PasswordBearer
+import pymongo
 import os
 import logging
 

@@ -15,11 +15,6 @@ FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
-RUN touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chown -R nginx:nginx /usr/share/nginx/html
-
 EXPOSE 80
 
-CMD ["sh", "-c", "nginx -s reload || nginx -g 'daemon off;'"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -38,7 +38,7 @@ deploy_service() {
     cd ${SERVICE_DIR}
 
     echo "🔨 Building Docker image: ${IMAGE}..."
-    docker build -t ${IMAGE} .
+    docker build --no-cache -t ${IMAGE} .
 
     echo "📤 Pushing Docker image ${IMAGE} to Docker Hub..."
     docker push ${IMAGE}
