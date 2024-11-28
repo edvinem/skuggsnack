@@ -107,46 +107,6 @@ def send_message(message: MessageCreate, token: str = Depends(oauth2_scheme)):
         logger.error(f"Error in send_message: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-@app.post("/create_channel", response_model=Dict[str, str])
-def create_channel(channel: Channel, token: str = Depends(oauth2_scheme)):
-    user = verify_token(token)
-    try:
-        db["channels"].insert_one(channel.model_dump())
-        return {"message": "Channel created successfully"}
-    except ConnectionFailure:
-        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
-
-@app.post("/create_group", response_model=Dict[str, str])
-def create_group(group: Group, token: str = Depends(oauth2_scheme)):
-    user = verify_token(token)
-    try:
-        db["groups"].insert_one(group.model_dump())
-        return {"message": "Group created successfully"}
-    except ConnectionFailure:
-        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
-
-@app.get("/get_channel_messages/{channel_name}", response_model=List[MessageResponse])
-def get_channel_messages(channel_name: str, token: str = Depends(oauth2_scheme)):
-    user = verify_token(token)
-    try:
-        messages = list(messages_collection.find({"recipient": channel_name, "recipient_type": "channel"}))
-        for message in messages:
-            message["_id"] = str(message["_id"])
-        return messages
-    except ConnectionFailure:
-        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
-
-@app.get("/get_group_messages/{group_name}", response_model=List[MessageResponse])
-def get_group_messages(group_name: str, token: str = Depends(oauth2_scheme)):
-    user = verify_token(token)
-    try:
-        messages = list(messages_collection.find({"recipient": group_name, "recipient_type": "group"}))
-        for message in messages:
-            message["_id"] = str(message["_id"])
-        return messages
-    except ConnectionFailure:
-        raise HTTPException(status_code=500, detail="Failed to connect to the database.")
-
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
