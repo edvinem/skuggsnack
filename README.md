@@ -21,4 +21,4 @@ Skuggsnack is a simple web-based chat application. It provides a user-friendly i
 
 1. Register a new user
 2. Log in with your credentials
-3. Add friends and start chatting in real-time
+3. Add friends and start chattin'!
