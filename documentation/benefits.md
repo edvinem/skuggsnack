@@ -1,35 +1,32 @@
-# Benefits and Challenges of Design
+# Benefits and Challenges for Skuggsnack
+
 ## Benefits
+
 ### Scalability
 * Microservices can be scaled independently based on load.
-Kubernetes automates scaling through Deployments and ReplicaSets.
+* Kubernetes will automate scaling via deployments and replicas.
+
 ### Maintainability
-* Docker provides consistent environments, making it easier to develop, test, and deploy services.
-* Separation of concerns allows teams to work on services independently, however uninteresting since I develop alone
-* Easier to update or replace individual components without affecting others.
+* Docker provides consistent environments for each microservice, which are also seperated for easier maintenance and updates.
+* This means that development and deployment is consistent regardless of host OS, CPU architecture etc. 
+
 ### Resilience
-* Kubernetes ensures high availability by automatically restarting failed containers and rescheduling them on healthy nodes.
-* Services are isolated in their own containers, reducing the impact of failures on the overall system.
-* Kubernetes health checks monitor the status of services and maintain system stability.
-### Flexibility
-* Containerization with Docker allows for consistent deployment environments across development, staging, and production.
-* Kubernetes orchestration provides flexibility in deploying services on different nodes and environments.
+* Kubernetes ensures high availability for containers by automatically restarting failed containers and restarting them on healthy nodes.
+* The microservices are isolated in their own containers, this reduces the impact of failures on the host system.
+* Kubernetes health checks monitor the status of servics automatically.
 
 ## Challenges
+
 ### Complexity
-* Managing multiple services increases operational complexity.
-* Kubernetes orchestration requires knowledge of various resources like Deployments, Services, ConfigMaps, and Secrets.
-* Monitoring and logging across microservices necessitate robust tooling.
+* Managing multiple may increase complexity, as the number of microservices increases.
+* Kubernetes deployment can be complex and usually require a good amount of knowledge.
 
 ### Networking
-* Service discovery and communication between services need to be managed within the Kubernetes cluster.
-* Exposing services externally requires careful configuration of
-NodePort services and integration with Traefik.
-* Networking policies must be defined to secure inter-service communication.
-
+* Service discovery and communication between microservices in the kubernetes cluster can also be complex, resulting in failing connections.
+* Networking policies must be secure if the application is exposed to the public, which may also require a high amount of knowledge.
 
 ### Security
-* Multiple services increase the attack surface, requiring secure practices.
-* Managing sensitive data using Kubernetes Secrets is crucial to prevent exposure.
-* Implementing JWT authentication ensures secure communication but requires proper key management.
-* MongoDB needs to be secured to protect data at rest and during transit.
+* Multiple services and their technologies and libraries, increase the attack surface.
+* Managing sensitive data correctly using kubernetes screts is crucial to prevent leaks.
+* Implementing JWT authentication ensures secure communication but also requires proper key management.
+* MongoDB needs to be properly secured to protect data at rest and during transit.
