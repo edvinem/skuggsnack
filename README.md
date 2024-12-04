@@ -14,7 +14,7 @@ Skuggsnack is a simple web-based chat application. It provides a user-friendly i
 1. **Clone the Repository**
 
     ```bash
-    git clone https://github.com/yourusername/skuggsnack.git
+    git clone https://github.com/edvinem/skuggsnack.git
     cd skuggsnack
     ```
 2. **Run Minikube Deployment Script**
