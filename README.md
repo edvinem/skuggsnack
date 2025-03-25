@@ -1,6 +1,8 @@
 # SkuggSnack
 
-Skuggsnack is a simple (but vulnerable) web-based chat application. It provides a user-friendly interface where users can register, log in, and add friends. The application follows a microservices architecture with separate services for frontend, authentication and chat. 
+Skuggsnack is a simple web-based chat application. It provides a user-friendly interface where users can register, log in, and add friends. The application follows a microservices architecture with separate services for frontend, authentication and chat. 
+
+*NOTE: This is a school project and is not suitable to expose.*
 
 ## Main Technologies
 - Frontend: React.js
